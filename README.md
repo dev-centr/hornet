@@ -1,26 +1,32 @@
 # Hornet
 
-DevCentr's lightweight agent harness — persisted **node graph** on disk, **Mixr** model routing, actor-model UI.
+DevCentr's lightweight agent harness — **D only**, **tgc** (thread-local GC) enabled by default, persisted node graph on disk, **Mixr** model routing.
 
 | Phase | Ships |
 | --- | --- |
-| **v0** | `graph.json`, per-node `meta.json` + `chat.jsonl`, orchestrator metathread, spawn API |
-| **v1** | Mixr router, wait-graph (`warn` default), HTTP + grid/fork web UI |
-| **v2** | Temporal layout engine — scrubber, fade, bookmarks, heatmap |
+| **v0** | `graph.json`, per-node `meta.json` + `chat.jsonl`, orchestrator metathread, CLI |
+| **v1** | Mixr router, wait-graph (`warn` default), HTTP desk (`hornet serve`) |
+| **v2** | Temporal layout engine — scrubber, fade, heatmap, scoped bookmarks |
+
+## Build
+
+Requires [DUB](https://dub.pm/) and LDC/DMD. Thread-local GC via dependency on [`dlang-supplemental/tgc`](../../dlang-supplemental/tgc) (`Tgc_default` → `--DRT-gcopt=gc:tgc` embedded in the binary).
+
+```powershell
+cd $env:code\github.com\dev-centr\hornet
+dub build
+dub test
+```
 
 ## Quick start
 
 ```powershell
-cd $env:code\github.com\dev-centr\hornet
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
-hornet init ./my-chat
-hornet spawn my-chat --parent coordinator --type task --title "Sync docs"
-hornet serve my-chat --port 8765
+.\hornet.exe init .\my-chat
+.\hornet.exe spawn .\my-chat --parent=coordinator --type=task --title=docs-sync
+.\hornet.exe serve .\my-chat --port=8765
 ```
 
-Open http://localhost:8765 for the desk UI.
+Open http://127.0.0.1:8765 for the desk UI.
 
 ## Disk layout
 
@@ -32,9 +38,15 @@ $CHAT_ROOT/
   orchestrator/meta.jsonl
   nodes/{id}/meta.json
   nodes/{id}/chat.jsonl
-  timeline/bookmarks.jsonl   # v2
+  timeline/bookmarks.jsonl
 ```
 
 ## Harness
 
-Set `HARNESS_NAME = hornet` in `$CODE_ROOT/harness.md`. See `dev-centr/agent-rules` docs **Agent harness (Hornet)**.
+Set `HARNESS_NAME = hornet` in `$CODE_ROOT/harness.md`.
+
+## Architecture
+
+- **Long-lived:** `hornet serve` — supervisor + HTTP desk (future: `hornetd` RPC for thin CLI clients).
+- **One-shot:** CLI subcommands touch disk directly (git-shaped); no Python, no embedded interpreter per invoke.
+- **tgc:** per-thread heaps; collections do not stop-the-world sibling threads — fits actor swarms + `@nogc` workers.

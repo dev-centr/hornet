@@ -1,0 +1,21 @@
+name "hornet"
+description "DevCentr Hornet harness — actor-model node graph on disk, Mixr routing, desk UI"
+authors "dev-centr"
+copyright "Copyright (c) 2026, dev-centr contributors"
+license "BSL-1.0"
+version "0.4.0"
+
+dependency "tgc" path="../../dlang-supplemental/tgc"
+
+configuration "application" {
+    targetType "executable"
+    mainSourceFile "source/hornet/app.d"
+    sourcePaths "source"
+    versions "Tgc_default"
+}
+
+configuration "unittest" {
+    targetType "library"
+    sourcePaths "source" "tests"
+    versions "Tgc_default"
+}
