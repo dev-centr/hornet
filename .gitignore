@@ -1,0 +1,10 @@
+*
+!.gitignore
+!hornet/
+!hornet/**
+!tests/
+!tests/**
+!web/
+!web/**
+!pyproject.toml
+!README.md
