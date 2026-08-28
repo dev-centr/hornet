@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hornet desk</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="shell-bar">
+    <div class="shell-identity">
+      <span class="shell-label">Hornet</span>
+      <strong id="run-chip">coordinator</strong>
+    </div>
+    <div class="shell-controls">
+      <label class="mode-toggle"><input type="checkbox" id="serialized-mode" /> Serialized (old wall)</label>
+      <button type="button" id="btn-spawn-task" class="epoch-btn">Spawn task</button>
+    </div>
+  </header>
+
+  <p class="lineage-strip" id="lineage-strip">Spawn: coordinator → task nodes</p>
+
+  <section class="inbox-region" id="inbox-region" aria-label="Task node grid">
+    <div class="inbox-grid" id="inbox-grid" role="list"></div>
+  </section>
+
+  <aside class="fork-panel" id="fork-panel" aria-label="Node fork chat">
+    <div class="fork-header">
+      <button type="button" id="fork-close" class="fork-close" aria-label="Close fork">×</button>
+      <div>
+        <strong id="fork-title">Node</strong>
+        <span class="fork-meta" id="fork-status"></span>
+      </div>
+    </div>
+    <ol class="fork-lines" id="fork-lines"></ol>
+    <form class="fork-compose" id="fork-compose">
+      <input type="text" id="fork-input" placeholder="Message this node…" autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </aside>
+
+  <section class="temporal-panel" id="temporal-panel" aria-label="Timeline">
+    <div class="temporal-header">
+      <span>Timeline</span>
+      <select id="timeline-scope">
+        <option value="global">Global</option>
+      </select>
+      <input type="range" id="timeline-zoom" min="0.5" max="3" step="0.1" value="1" title="Zoom" />
+    </div>
+    <canvas id="timeline-heatmap" height="48"></canvas>
+    <input type="range" id="timeline-scrub" min="0" max="100" value="100" class="timeline-scrub" />
+    <ul class="timeline-bookmarks" id="timeline-bookmarks"></ul>
+  </section>
+
+  <section class="main-thread" aria-label="Coordinator chat">
+    <div class="chat-header">
+      <span class="chat-title">Coordinator</span>
+      <span class="chat-meta" id="thread-meta">Mixr-routed summaries</span>
+    </div>
+    <ol class="chat-lines" id="main-lines" aria-live="polite"></ol>
+  </section>
+
+  <p class="bus-strip" id="bus-strip" role="status">Grid mode — cards update in place.</p>
+
+  <script src="/static/app.js" type="module"></script>
+</body>
+</html>

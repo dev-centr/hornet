@@ -58,6 +58,27 @@ def cmd_graph(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    from hornet.server import run_server
+
+    run_server(Path(args.chat_root), host=args.host, port=args.port, policy=args.policy)
+    return 0
+
+
+def cmd_route(args: argparse.Namespace) -> int:
+    from hornet.mixr import Mixr
+
+    store = ChatStore(Path(args.chat_root))
+    node = store.load_node(args.node)
+    mixr = Mixr(policy=args.policy)
+    plan = mixr.route(node, job_hint=args.hint or "")
+    mixr.apply_to_node(node, plan)
+    store.save_node(node)
+    store.append_metathread("route", {"node": node.id, **plan.to_dict()})
+    print(json.dumps(plan.to_dict(), indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="hornet", description="DevCentr Hornet harness")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -95,6 +116,20 @@ def main(argv: list[str] | None = None) -> int:
     p_gr = sub.add_parser("graph", help="Dump all nodes")
     p_gr.add_argument("chat_root")
     p_gr.set_defaults(func=cmd_graph)
+
+    p_srv = sub.add_parser("serve", help="HTTP desk UI (v1+)")
+    p_srv.add_argument("chat_root")
+    p_srv.add_argument("--host", default="127.0.0.1")
+    p_srv.add_argument("--port", type=int, default=8765)
+    p_srv.add_argument("--policy", default="balanced", choices=["balanced", "cheap", "quality", "byok-only"])
+    p_srv.set_defaults(func=cmd_serve)
+
+    p_rt = sub.add_parser("route", help="Mixr route a node (v1)")
+    p_rt.add_argument("chat_root")
+    p_rt.add_argument("--node", required=True)
+    p_rt.add_argument("--hint", default="")
+    p_rt.add_argument("--policy", default="balanced", choices=["balanced", "cheap", "quality", "byok-only"])
+    p_rt.set_defaults(func=cmd_route)
 
     args = parser.parse_args(argv)
     return args.func(args)
