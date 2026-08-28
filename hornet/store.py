@@ -225,10 +225,10 @@ class ChatStore:
     ) -> NodeRecord | None:
         """Heuristic model-proposed spawn (v0 stub — keyword boundaries)."""
         lower = user_text.lower()
-        markers = ["also,", "another idea", "separately", "side note", "new topic", "while we're at it"]
+        markers = [" also ", "also,", "another idea", "separately", "side note", "new topic", "while we're at it"]
         if not any(m in lower for m in markers):
             return None
-        if " or " in lower and "continue" in lower:
+        if " or " in lower and ("continue" in lower or "either" in lower):
             return self.spawn(
                 node_id,
                 "disambiguation",
