@@ -7,6 +7,7 @@ DevCentr's lightweight agent harness — **D only**, **tgc** (thread-local GC) e
 | **v0** | `graph.json`, per-node `meta.json` + `chat.jsonl`, orchestrator metathread, CLI |
 | **v1** | Mixr router, wait-graph (`warn` default), HTTP desk (`hornet serve`) |
 | **v2** | Temporal layout engine — scrubber, fade, heatmap, scoped bookmarks |
+| **desk PM** | Status colors for `awaiting_user` / failed; **Mark completed** + **Archive** (`POST /api/hide`) |
 
 ## Build
 

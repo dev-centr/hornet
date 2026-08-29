@@ -15,7 +15,15 @@ async function api(path, opts = {}) {
 }
 
 function statusLabel(s) {
-  return (s || 'idle').charAt(0).toUpperCase() + (s || 'idle').slice(1);
+  const map = {
+    awaiting_user: 'Needs you',
+    running: 'Working',
+    done: 'Completed',
+    blocked: 'Blocked',
+    failed: 'Failed',
+    idle: 'Idle',
+  };
+  return map[s] || ((s || 'idle').charAt(0).toUpperCase() + (s || 'idle').slice(1));
 }
 
 function renderGrid(nodes, opacities = {}) {
@@ -133,6 +141,26 @@ $('fork-close').addEventListener('click', () => {
   selectedId = null;
   $('fork-panel').classList.add('is-hidden');
   loadGraph();
+});
+
+$('btn-mark-complete').addEventListener('click', async () => {
+  if (!selectedId) return;
+  await api('/api/status', {
+    method: 'POST',
+    body: JSON.stringify({ nodeId: selectedId, status: 'done', summary: 'User marked completed' }),
+  });
+  await openFork(selectedId);
+});
+
+$('btn-archive').addEventListener('click', async () => {
+  if (!selectedId) return;
+  await api('/api/hide', {
+    method: 'POST',
+    body: JSON.stringify({ nodeId: selectedId, hidden: true }),
+  });
+  selectedId = null;
+  $('fork-panel').classList.add('is-hidden');
+  await loadGraph();
 });
 
 $('fork-compose').addEventListener('submit', async (e) => {

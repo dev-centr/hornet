@@ -100,10 +100,33 @@ body {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-running { background: #8ea5ff; animation: pulse 1.2s ease infinite; }
+.status-running { background: #e8a54b; animation: pulse 1.2s ease infinite; }
 .status-done { background: #5ecf9a; }
-.status-blocked { background: #e05a5a; }
-.status-idle { background: #888; }
+.status-blocked { background: #c97b7b; }
+.status-failed { background: #e05a5a; }
+.status-awaiting_user { background: #6eb5ff; }
+.status-idle { background: #9aa3ad; }
+
+.fork-actions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.fork-action {
+  min-height: 2rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.fork-action:hover { color: var(--focus); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }

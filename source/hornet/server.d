@@ -187,6 +187,14 @@ string handleRequest(ref ServerContext ctx, string req)
             o["node"] = node.toJson();
             return jsonResponse(200, o);
         }
+        if (path == "/api/hide")
+        {
+            const bool hidden = ("hidden" in j) ? j["hidden"].boolean : true;
+            auto node = ctx.store.hideNode(j["nodeId"].str, hidden);
+            JSONValue o = JSONValue.emptyObject;
+            o["node"] = node.toJson();
+            return jsonResponse(200, o);
+        }
         if (path == "/api/route")
         {
             auto node = ctx.store.loadNode(j["nodeId"].str);
