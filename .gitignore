@@ -2,6 +2,7 @@
 !.gitignore
 !dub.sdl
 !README.md
+!CHANGELOG.adoc
 !source/
 !source/**
 !tests/

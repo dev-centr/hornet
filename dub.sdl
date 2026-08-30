@@ -3,7 +3,7 @@ description "DevCentr Hornet harness — actor-model node graph on disk, Mixr ro
 authors "dev-centr"
 copyright "Copyright (c) 2026, dev-centr contributors"
 license "BSL-1.0"
-version "0.4.0"
+version "0.5.0"
 
 dependency "tgc" path="../../dlang-supplemental/tgc"
 

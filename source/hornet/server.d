@@ -140,6 +140,33 @@ string handleRequest(ref ServerContext ctx, string req)
             double zoom = queryParam(query, "zoom", "1").to!double;
             return jsonResponse(200, ctx.temporal.snapshot(viewScope, at, zoom));
         }
+        if (path == "/api/health" || path == "/health")
+        {
+            JSONValue o = JSONValue.emptyObject;
+            o["ok"] = JSONValue(true);
+            o["name"] = JSONValue("hornet");
+            o["version"] = JSONValue("0.5.0");
+            o["mixr"] = ctx.mixr.statusJson();
+            return jsonResponse(200, o);
+        }
+        if (path == "/v1/models")
+        {
+            JSONValue data = JSONValue.emptyArray;
+            foreach (id; [
+                    "z-ai/glm-5.3-flash", "z-ai/glm-5.3", "minimax/minimax-m3",
+                    "moonshotai/kimi-k3", "deepseek/deepseek-chat", "mixr-router"
+                ])
+            {
+                JSONValue m = JSONValue.emptyObject;
+                m["id"] = JSONValue(id);
+                m["object"] = JSONValue("model");
+                data.array ~= m;
+            }
+            JSONValue o = JSONValue.emptyObject;
+            o["object"] = JSONValue("list");
+            o["data"] = data;
+            return jsonResponse(200, o);
+        }
     }
     else if (method == "POST")
     {
@@ -236,6 +263,96 @@ string handleRequest(ref ServerContext ctx, string req)
                 ("text" in j) ? j["text"].str : "", ("image" in j) ? j["image"].str : "");
             JSONValue o = JSONValue.emptyObject;
             o["ok"] = JSONValue(true);
+            return jsonResponse(200, o);
+        }
+        if (path == "/api/provider/session")
+        {
+            // t3code HornetDriver: map a remote thread to a discussion node under coordinator.
+            auto threadId = ("threadId" in j) ? j["threadId"].str : "";
+            auto title = ("title" in j) ? j["title"].str : "t3-thread";
+            if (!title.length)
+                title = "t3-thread";
+            string nodeId = ("resumeNodeId" in j) ? j["resumeNodeId"].str : "";
+            NodeRecord node;
+            if (nodeId.length)
+            {
+                try
+                    node = ctx.store.loadNode(nodeId);
+                catch (Exception)
+                    nodeId = "";
+            }
+            if (!nodeId.length)
+            {
+                node = ctx.store.spawn("coordinator", NodeType.discussion, title,
+                    threadId, "t3code provider session");
+                auto plan = ctx.mixr.route(node, title);
+                ctx.mixr.applyToNode(node, plan);
+                ctx.store.saveNode(node);
+            }
+            JSONValue o = JSONValue.emptyObject;
+            o["sessionId"] = JSONValue(node.id);
+            o["nodeId"] = JSONValue(node.id);
+            o["threadId"] = JSONValue(threadId);
+            o["title"] = JSONValue(node.title.length ? node.title : title);
+            o["mixrModel"] = JSONValue(node.mixrModel);
+            o["mixrReason"] = JSONValue(node.mixrReason);
+            return jsonResponse(200, o);
+        }
+        if (path == "/api/provider/turn")
+        {
+            auto nodeId = j["sessionId"].str;
+            auto text = ("input" in j) ? j["input"].str : "";
+            const allowSuppressed = ("allowSuppressed" in j) && j["allowSuppressed"].boolean;
+            ctx.store.appendChat(nodeId, ChatLine("user", text, cast(int) text.split.length));
+            auto node = ctx.store.loadNode(nodeId);
+            auto plan = ctx.mixr.route(node, text, allowSuppressed);
+            ctx.mixr.applyToNode(node, plan);
+            ctx.store.saveNode(node);
+            ctx.store.setStatus(nodeId, NodeStatus.running, "t3 turn");
+
+            // Stub assistant until Hornet wires live provider completions.
+            // Persists route metadata so t3code can stream a useful reply.
+            import std.format : format;
+            auto assistant = format(
+                "Mixr route → **%s** via `%s` (%s).\n\n%s\n\n_Hornet received your turn and persisted it on node `%s`. Live model invoke is next; this reply confirms the provider seam._",
+                plan.model, plan.provider, plan.catalogKey, plan.reason, nodeId);
+            ctx.store.appendChat(nodeId, ChatLine("assistant", assistant, cast(int) assistant.split.length));
+            ctx.store.setStatus(nodeId, NodeStatus.idle, "awaiting next turn");
+
+            JSONValue o = JSONValue.emptyObject;
+            o["sessionId"] = JSONValue(nodeId);
+            o["assistantText"] = JSONValue(assistant);
+            o["route"] = plan.toJson();
+            return jsonResponse(200, o);
+        }
+        if (path == "/v1/chat/completions")
+        {
+            // OpenAI-compat stub: returns Mixr route plan as assistant content.
+            string hint;
+            if ("messages" in j)
+                foreach (m; j["messages"].array)
+                    if (("role" in m) && m["role"].str == "user" && ("content" in m))
+                        hint = m["content"].str;
+            NodeRecord phantom;
+            phantom.type = NodeType.task;
+            phantom.id = "openai-compat";
+            const allowSuppressed = ("allow_suppressed" in j) && j["allow_suppressed"].boolean;
+            auto plan = ctx.mixr.route(phantom, hint, allowSuppressed);
+            JSONValue message = JSONValue.emptyObject;
+            message["role"] = JSONValue("assistant");
+            message["content"] = JSONValue(plan.toJson().toString());
+            JSONValue choice = JSONValue.emptyObject;
+            choice["index"] = JSONValue(0);
+            choice["message"] = message;
+            choice["finish_reason"] = JSONValue("stop");
+            JSONValue o = JSONValue.emptyObject;
+            o["id"] = JSONValue("hornet-mixr");
+            o["object"] = JSONValue("chat.completion");
+            o["model"] = JSONValue(("model" in j) ? j["model"].str : plan.model);
+            JSONValue choices = JSONValue.emptyArray;
+            choices.array ~= choice;
+            o["choices"] = choices;
+            o["route"] = plan.toJson();
             return jsonResponse(200, o);
         }
     }

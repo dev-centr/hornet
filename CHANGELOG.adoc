@@ -1,0 +1,13 @@
+= Changelog
+:toc: preamble
+
+== 2026-08-30 — Mixr 0.5 cost routing + t3code provider seam
+
+* Mixr catalog drops Anthropic defaults; GLM / MiniMax / Kimi / DeepSeek tiers; suppress lists.
+* On-device router call via local OpenAI-compat URL; RAM/unreachable failover; `HORNET_AVAIL_RAM_MB` override.
+* HTTP: `GET /api/health`, `GET /v1/models`, `POST /v1/chat/completions`, `POST /api/provider/session|turn` for HornetDriver.
+* Version **0.5.0**.
+
+== Prior
+
+See git history for v0–v0.4 desk, wait-graph, temporal, and Mixr heuristics.

@@ -5,9 +5,14 @@ DevCentr's lightweight agent harness — **D only**, **tgc** (thread-local GC) e
 | Phase | Ships |
 | --- | --- |
 | **v0** | `graph.json`, per-node `meta.json` + `chat.jsonl`, orchestrator metathread, CLI |
+| **v0.5** | Mixr on-device + suppress lists; `/api/health`, OpenAI-compat stub, `/api/provider/*` for t3code |
 | **v1** | Mixr router, wait-graph (`warn` default), HTTP desk (`hornet serve`) |
 | **v2** | Temporal layout engine — scrubber, fade, heatmap, scoped bookmarks |
 | **desk PM** | Status colors for `awaiting_user` / failed; **Mark completed** + **Archive** (`POST /api/hide`) |
+
+## Changelog
+
+See [CHANGELOG.adoc](CHANGELOG.adoc).
 
 ## Build
 

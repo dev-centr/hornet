@@ -157,7 +157,8 @@ int cmdRoute(string[] args)
         return 1;
     chatRoot = args[1];
     ChatStore store = { root: chatRoot };
-    Mixr mixr = { policy: parsePolicy(policy) };
+    Mixr mixr;
+    mixr.policy = parsePolicy(policy);
     auto rec = store.loadNode(node);
     auto plan = mixr.route(rec, hint);
     mixr.applyToNode(rec, plan);
