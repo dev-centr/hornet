@@ -56,3 +56,4 @@ Set `HARNESS_NAME = hornet` in `$CODE_ROOT/harness.md`.
 - **Long-lived:** `hornet serve` — supervisor + HTTP desk (future: `hornetd` RPC for thin CLI clients).
 - **One-shot:** CLI subcommands touch disk directly (git-shaped); no Python, no embedded interpreter per invoke.
 - **tgc:** per-thread heaps; collections do not stop-the-world sibling threads — fits actor swarms + `@nogc` workers.
+- **Discovery vs routing:** [Open Provider Registry / UniProvider](https://github.com/dev-centr/uniprovider) finds endpoints; **Mixr** chooses models. Prefer OPR manifests over hard-coding a single local runner brand.

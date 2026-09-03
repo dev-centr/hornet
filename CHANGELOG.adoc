@@ -1,6 +1,10 @@
 = Changelog
 :toc: preamble
 
+== 2026-09-02 — OPR discovery cross-link
+
+* README Architecture notes link:https://github.com/dev-centr/uniprovider[UniProvider / Open Provider Registry] as the discovery layer Mixr should consume (not hard-coded single-runner detection).
+
 == 2026-08-30 — Mixr 0.5 cost routing + t3code provider seam
 
 * Mixr catalog drops Anthropic defaults; GLM / MiniMax / Kimi / DeepSeek tiers; suppress lists.
